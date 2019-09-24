@@ -15,10 +15,15 @@ public class ShopApiTest
 
     private readonly Dictionary<string, string> _variables = new Dictionary<string, string>();
 
-    private readonly JsonDiff _jsonDiff = new JsonDiffBuilder()
-        .UseAdditionalProperties()
-        .UseWildcard()
-        .Build();
+    private readonly JsonDiff _jsonDiff;
+
+    public ShopApiTest()
+    {
+        _jsonDiff = new JsonDiffBuilder()
+            .UseAdditionalProperties()
+            .Use(ExtractAndIgnoreVariables)
+            .Build();
+    }
 
     [YamlTest("~/3-aspnetcore-test/**/*.yml")]
     public async Task Run(ShopApiTestSpec spec)
@@ -27,11 +32,14 @@ public class ShopApiTest
         {
             var response = await SendRequest(request);
 
-            var responseContent = await response.EnsureSuccessStatusCode().Content.ReadAsStringAsync();
+            var responseContent = await response
+                .EnsureSuccessStatusCode()
+                .Content.ReadAsStringAsync();
 
-            _jsonDiff.Verify(
-                expected: JToken.Parse(request.Response),
-                actual: JToken.Parse(responseContent));
+            var expectedJson = JToken.Parse(request.Response ?? "{}");
+            var actualJson = JToken.Parse(string.IsNullOrEmpty(responseContent) ? "{}" : responseContent);
+
+            _jsonDiff.Verify(expectedJson, actualJson);
         }
     }
 
@@ -64,6 +72,19 @@ public class ShopApiTest
             content = content.Replace($"{{{key}}}", value);
         }
         return content;
+    }
+
+    private (JToken expected, JToken actual) ExtractAndIgnoreVariables(
+        JToken expected, JToken actual, string name, JsonDiff diff)
+    {
+        if (expected is JValue value && value.Value is string stringValue &&
+            stringValue.StartsWith("{") && stringValue.EndsWith("}"))
+        {
+            var variableName = stringValue.Substring(1, stringValue.Length - 2);
+            _variables[variableName] = actual.ToString();
+            return (expected, expected);
+        }
+        return (expected, actual);
     }
 }
 

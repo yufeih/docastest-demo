@@ -9,10 +9,9 @@ requests:
       ]
     }
   response: |
-    # capture variable {id} from HTTP response for future use
     { "id": "{id}" }
 
-- get: GET /api/shoppingcart/{id}
+- get: /api/shoppingcart/{id}
   response: |
     {
       "lines": [
@@ -31,7 +30,6 @@ requests:
       ]
     }
   response: |
-    # capture variable {id} from HTTP response for future use
     { "id": "{id}" }
 
 - delete: /api/shoppingcart/{id}

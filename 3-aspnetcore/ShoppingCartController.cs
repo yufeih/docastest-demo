@@ -24,7 +24,7 @@ namespace AspNetCoreTest.Controllers
     [ApiController]
     public class ShoppingCartController : ControllerBase
     {
-        private readonly ConcurrentDictionary<string, ShoppingCart> _shoppingCarts = new ConcurrentDictionary<string, ShoppingCart>();
+        private static readonly ConcurrentDictionary<string, ShoppingCart> _shoppingCarts = new ConcurrentDictionary<string, ShoppingCart>();
 
         [HttpGet("{id}")]
         public ActionResult<ShoppingCart> Get(string id)
