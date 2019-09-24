@@ -56,7 +56,7 @@ output: Hello YAML Test!
 ``````````markdown
 You can _also_ write test data in markdown files using YAML code blocks that starts with 6 or more backticks.
 
-``````yml
+``````test
 input: Markdown Test!
 output: Hello Markdown Test!
 ``````
